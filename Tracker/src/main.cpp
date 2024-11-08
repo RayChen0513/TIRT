@@ -8,6 +8,8 @@ int ps2x_e=1;
 byte ps2x_t=0;
 #define pressures false
 #define rumble false
+#define LEFT_TRACK 0
+#define RIGHT_TRACK 1
 
 const byte Motor1A=17;
 const byte Motor1B=16;
@@ -73,6 +75,106 @@ void run(int m1, int m2, int m3, int m4)
   }
 }
 
+bool is_left_tracker_on_line()
+{
+  return digitalRead(LEFT_TRACK);
+}
+
+bool is_right_tracker_on_line()
+{
+  return digitalRead(RIGHT_TRACK);
+}
+
+void stop()
+{
+  run(0, 0, 0, 0);
+}
+
+int Lx,
+    Ly,
+    Rx;
+
+void forward(int speed, int time = 0)
+{
+  run(speed, speed, speed, speed);
+  if(time != 0)
+  {
+    delay(time);
+    stop();
+  }
+}
+
+void backward(int speed, int time = 0)
+{
+  run(-speed, -speed, -speed, -speed);
+  if(time != 0)
+  {
+    delay(time);
+    stop();
+  }
+}
+
+void right_turn(int speed, int time = 0)
+{
+  run(speed, -speed, -speed, speed);
+  if(time != 0)
+  {
+    delay(time);
+    stop();
+  }
+}
+
+void left_turn(int speed, int time = 0)
+{
+  run(-speed, speed, speed, -speed);
+  if(time != 0)
+  {
+    delay(time);
+    stop();
+  }
+}
+
+void rightward(int speed, int time = 0)
+{
+  run(speed, -speed, speed, -speed);
+  if(time != 0)
+  {
+    delay(time);
+    stop();
+  }
+}
+
+void leftward(int speed, int time = 0)
+{
+  run(-speed, speed, -speed, speed);
+  if(time != 0)
+  {
+    delay(time);
+    stop();
+  }
+}
+
+void follow(int speed, int pass_time)
+{
+  while (!(is_left_tracker_on_line() && is_right_tracker_on_line()))
+  {
+    if (is_left_tracker_on_line())
+    {
+      left_turn(speed);
+    }
+    else if (is_right_tracker_on_line())
+    {
+      right_turn(speed);
+    }
+    else
+    {
+      forward(speed);
+    }
+    delay(pass_time);
+    stop();
+  }
+}
+
 void setup() {
   Serial.begin(9600);
   pinMode(Motor1A, OUTPUT);
@@ -85,17 +187,7 @@ void setup() {
   ps2x.config_gamepad(18, 23, 5, 19, 0, 0);
   
 }
-int Lx,
-    Ly,
-    Rx;
 
 void loop() {
-  ps2x.read_gamepad(0,ps2x_v);
-  delay(16);
-  
-  
-  Lx = map(ps2x.Analog(PSS_LX), 0, 255, -255, 255);
-  Ly = map(ps2x.Analog(PSS_LY), 0, 255, 255, -255);
-  Rx = map(ps2x.Analog(PSS_RX), 0, 255, -255, 255);
-  run(Ly+Lx+Rx, Ly-Lx-Rx, Ly+Lx-Rx, Ly-Lx+Rx);
+  follow(210, 800);
 }
