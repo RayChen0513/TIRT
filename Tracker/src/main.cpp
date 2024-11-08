@@ -1,15 +1,7 @@
 #include <Arduino.h>
-#include <PS2X_lib_temi.h>
 
-
-PS2X ps2x;
-byte ps2x_v=0;
-int ps2x_e=1;
-byte ps2x_t=0;
-#define pressures false
-#define rumble false
-#define LEFT_TRACK 0
-#define RIGHT_TRACK 1
+#define LEFT_TRACK 33
+#define RIGHT_TRACK 39
 
 const byte Motor1A=17;
 const byte Motor1B=16;
@@ -77,12 +69,12 @@ void run(int m1, int m2, int m3, int m4)
 
 bool is_left_tracker_on_line()
 {
-  return digitalRead(LEFT_TRACK);
+  return (analogRead(LEFT_TRACK) > 330 ? true:false);
 }
 
 bool is_right_tracker_on_line()
 {
-  return digitalRead(RIGHT_TRACK);
+  return (analogRead(RIGHT_TRACK) > 330 ? true:false);
 }
 
 void stop()
@@ -170,9 +162,12 @@ void follow(int speed, int pass_time)
     {
       forward(speed);
     }
-    delay(pass_time);
-    stop();
   }
+  stop();
+  delay(200);
+  forward(speed);
+  delay(pass_time);
+  stop();
 }
 
 void setup() {
@@ -184,10 +179,9 @@ void setup() {
   pinMode(Motor3A, OUTPUT);
   pinMode(Motor3B, OUTPUT);
   pinMode(Motor4A, OUTPUT);
-  ps2x.config_gamepad(18, 23, 5, 19, 0, 0);
   
 }
 
 void loop() {
-  follow(210, 800);
+  follow(210, 600);
 }
